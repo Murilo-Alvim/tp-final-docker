@@ -1,7 +1,7 @@
 # TP Final: Docker Compose
 
 Arquitetura de Serviços em Nuvem · UNISANTA · Prof. Andrews Egas
-Dupla: Murilo Francisco Alvim (RA 240874) e Cauê Paulino (RA 243309)
+Dupla: Murilo Francisco Alvim (RA 240874) e Bruno Barros (RA 131037)
 
 ## Objetivo
 Ambiente com dois containers orquestrados pelo Docker Compose:
