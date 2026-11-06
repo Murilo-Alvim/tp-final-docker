@@ -1,0 +1,39 @@
+# Define os serviços (containers) do ambiente
+services:
+
+  # Container 1: site estático com imagem customizada do Nginx
+  site:
+    build: ./site                 # usa o Dockerfile da pasta ./site
+    image: tp-final-site          # nome da imagem gerada
+    container_name: tp_site
+    ports:
+      - "8080:80"                 # host:container
+    depends_on:
+      - api
+    networks:
+      - tp-net
+    restart: unless-stopped
+
+  # Container 2: API HTTP simples em Node.js
+  api:
+    build: ./api
+    image: tp-final-api
+    container_name: tp_api
+    ports:
+      - "8081:3000"
+    environment:
+      - APP_PORT=3000
+    volumes:
+      - api_logs:/app/logs        # logs persistem mesmo se o container for removido
+    networks:
+      - tp-net
+    restart: unless-stopped
+
+# Rede bridge para os containers se comunicarem pelo nome do serviço
+networks:
+  tp-net:
+    driver: bridge
+
+# Volume nomeado para persistir os logs da API
+volumes:
+  api_logs:

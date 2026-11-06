@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TP Final · Docker Compose</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --mar: #0E2A47; --casco: #163D66; --carga: #F2B705;
+      --aco: #C9D3DD; --espuma: #F5F8FB; --ok: #3FB27F; --erro: #E5484D;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: "Archivo", system-ui, sans-serif; background: var(--mar); color: var(--espuma); min-height: 100vh; line-height: 1.55; }
+    main { max-width: 880px; margin: 0 auto; padding: 56px 24px 40px; }
+    .pilha { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; }
+    .cx {
+      background-color: var(--carga); color: var(--mar); padding: 18px 20px; border-radius: 4px;
+      font-weight: 800; font-size: 1.05rem;
+      background-image: repeating-linear-gradient(90deg, transparent 0 14px, rgba(14,42,71,.18) 14px 16px);
+    }
+    .cx small { display: block; font-weight: 600; font-size: .78rem; opacity: .8; }
+    .cx.b { background-color: var(--aco); }
+    h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.1; margin-bottom: 14px; }
+    .sub { color: var(--aco); max-width: 60ch; margin-bottom: 40px; }
+    section { border-top: 2px solid var(--casco); padding: 28px 0; }
+    h2 { font-size: 1.15rem; margin-bottom: 14px; }
+    .status { display: flex; align-items: center; gap: 12px; font-family: "IBM Plex Mono", monospace; }
+    .luz { width: 14px; height: 14px; border-radius: 50%; background: var(--aco); flex-shrink: 0; }
+    .luz.ok { background: var(--ok); } .luz.erro { background: var(--erro); }
+    pre { margin-top: 14px; background: var(--casco); padding: 16px; border-radius: 4px; font-family: "IBM Plex Mono", monospace; font-size: .85rem; overflow-x: auto; }
+    button { margin-top: 16px; font: inherit; font-weight: 600; background: var(--carga); color: var(--mar); border: 0; padding: 10px 18px; border-radius: 4px; cursor: pointer; }
+    button:focus-visible { outline: 3px solid var(--espuma); outline-offset: 2px; }
+    table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    td { padding: 8px 0; border-bottom: 1px solid var(--casco); vertical-align: top; }
+    td:first-child { color: var(--aco); width: 30%; }
+    footer { color: var(--aco); font-size: .85rem; padding-top: 28px; border-top: 2px solid var(--casco); }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="pilha" aria-hidden="true">
+      <div class="cx">site<small>nginx · :8080</small></div>
+      <div class="cx b">api<small>node · :8081</small></div>
+    </div>
+
+    <h1>Dois containers, um docker-compose.yml</h1>
+    <p class="sub">Este site estático roda numa imagem Nginx customizada. Ao lado dele, uma API em Node.js
+      roda em outro container. Os dois sobem juntos com <code>docker compose up</code>.</p>
+
+    <section>
+      <h2>Status da API</h2>
+      <div class="status"><span class="luz" id="luz"></span><span id="texto">Verificando a API em localhost:8081…</span></div>
+      <pre id="resposta">aguardando resposta</pre>
+      <button id="testar">Testar a API de novo</button>
+    </section>
+
+    <section>
+      <h2>Serviços</h2>
+      <table>
+        <tr><td>site</td><td>imagem customizada (Dockerfile com nginx:alpine), porta 8080:80</td></tr>
+        <tr><td>api</td><td>Node.js 20 alpine, porta 8081:3000, volume api_logs</td></tr>
+        <tr><td>rede</td><td>tp-net (bridge criada pelo Compose)</td></tr>
+      </table>
+    </section>
+
+    <footer>
+      TP Final · Arquitetura de Serviços em Nuvem · UNISANTA<br>
+      Murilo Francisco Alvim (RA 240874) e Cauê Paulino (RA 243309)
+    </footer>
+  </main>
+
+  <script>
+    const luz = document.getElementById('luz');
+    const texto = document.getElementById('texto');
+    const resposta = document.getElementById('resposta');
+    async function testarApi() {
+      luz.className = 'luz';
+      texto.textContent = 'Verificando a API em localhost:8081…';
+      try {
+        const r = await fetch('http://localhost:8081/api/status');
+        const dados = await r.json();
+        luz.className = 'luz ok';
+        texto.textContent = 'API respondendo';
+        resposta.textContent = JSON.stringify(dados, null, 2);
+      } catch (e) {
+        luz.className = 'luz erro';
+        texto.textContent = 'API fora do ar. Rode docker compose up e confira a porta 8081.';
+        resposta.textContent = String(e);
+      }
+    }
+    document.getElementById('testar').addEventListener('click', testarApi);
+    testarApi();
+  </script>
+</body>
+</html>
